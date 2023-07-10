@@ -1,0 +1,13 @@
+@import url(https://fonts.googleapis.com/css?family=Nunito);#app #navbar .navbar-logo {
+  display: flex;
+}
+
+#app #navbar .navbar-nav {
+  display: flex;
+  list-style: none;
+}
+
+#app #navbar .navbar-nav li {
+  padding-right: 20px;
+}
+

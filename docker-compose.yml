@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  # PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: php
+    container_name: php
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+      working_dir: /var/www
+    ports:
+      - "1234:8000"
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/php/time.ini:/usr/local/etc/php/conf.d/time.ini
+    networks:
+      - app-network
+
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    depends_on:
+      - app
+    links:
+      - app
+    tty: true
+    ports:
+      - "90:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+      - ./docker/nginx/log:/var/log/nginx/:rw
+    networks:
+      - app-network
+
+  # MYSQL Service
+  db:
+    image: mysql:5.6
+    platform: linux/amd64
+    restart: always
+    environment:
+      MYSQL_DATABASE: blog
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - ./docker/mysql/dbdata:/var/lib/mysql
+    ports:
+      - "33066:3306"
+    networks:
+      - app-network
+
+#Docker NetWorks
+networks:
+  app-network:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
